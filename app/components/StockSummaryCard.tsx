@@ -1,33 +1,75 @@
+import { TagItem } from '@/app/mocks/summaryMocks';
+
 interface StockSummaryCardProps {
   symbol: string;
   name: string;
   summary: string;
-  tags: string[];
+  tags: TagItem[];
+  sentiment: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
+  sentiment_score: number;
+  confidence: number;
 }
 
-export default function StockSummaryCard({ symbol, name, summary, tags }: StockSummaryCardProps) {
+const SENTIMENT_STYLE = {
+  POSITIVE: 'bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+  NEGATIVE: 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300',
+  NEUTRAL: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
+};
+
+const SENTIMENT_LABEL = {
+  POSITIVE: '긍정',
+  NEGATIVE: '부정',
+  NEUTRAL: '중립',
+};
+
+export default function StockSummaryCard({
+  symbol,
+  name,
+  summary,
+  tags,
+  sentiment,
+  sentiment_score,
+  confidence,
+}: StockSummaryCardProps) {
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-3 bg-background">
 
-      {/* 종목명 영역 */}
-      <div className="flex items-baseline gap-2">
-        <span className="text-lg font-bold text-foreground">{symbol}</span>
-        <span className="text-sm text-gray-500">{name}</span>
+      {/* 종목명 + 감성 */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-baseline gap-2">
+          <span className="text-lg font-bold text-foreground">{symbol}</span>
+          <span className="text-sm text-gray-500">{name}</span>
+        </div>
+        <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${SENTIMENT_STYLE[sentiment]}`}>
+          {SENTIMENT_LABEL[sentiment]} {sentiment_score > 0 ? '+' : ''}{sentiment_score.toFixed(2)}
+        </span>
       </div>
 
-      {/* 요약 텍스트 영역 */}
+      {/* 요약 텍스트 */}
       <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{summary}</p>
 
-      {/* 태그 영역 */}
+      {/* 태그 */}
       <div className="flex flex-wrap gap-2">
         {tags.map((tag) => (
           <span
-            key={tag}
+            key={tag.label}
             className="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 rounded-full dark:bg-blue-950 dark:text-blue-300"
           >
-            {tag}
+            {tag.label}
           </span>
         ))}
+      </div>
+
+      {/* 신뢰도 */}
+      <div className="flex items-center gap-2 mt-1">
+        <span className="text-xs text-gray-400">신뢰도</span>
+        <div className="flex-1 h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-400 rounded-full"
+            style={{ width: `${confidence * 100}%` }}
+          />
+        </div>
+        <span className="text-xs text-gray-400">{Math.round(confidence * 100)}%</span>
       </div>
     </div>
   );

@@ -14,4 +14,10 @@ export const httpClient = {
       headers: { "Content-Type": "application/json" },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }),
+
+  delete: (path: string) =>
+    fetch(`${clientEnv.apiBaseUrl}${path}`, {
+      method: "DELETE",
+      credentials: "include",
+    }),
 };
