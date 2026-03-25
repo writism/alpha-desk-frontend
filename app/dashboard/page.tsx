@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useDashboard } from "@/features/dashboard/application/hooks/useDashboard"
 import { excludeCurrentSummaryFromLogs } from "@/features/dashboard/domain/excludeCurrentSummaryFromLogs"
+import { useDailyReturnsHeatmap } from "@/features/stock/application/hooks/useDailyReturnsHeatmap"
 import { useWatchlist } from "@/features/watchlist/application/hooks/useWatchlist"
 import { DashboardAnalysisLogsSection } from "./components/DashboardAnalysisLogsSection"
 import { DashboardPipelineResult } from "./components/DashboardPipelineResult"
@@ -77,6 +78,20 @@ export default function DashboardPage() {
         [analysisLogs, summaries],
     )
 
+    /** 요약에 없는 과거 로그 종목도 히트맵 배치에 포함 */
+    const heatmapSymbols = useMemo(() => {
+        const ids = new Set<string>()
+        for (const s of summaries) {
+            ids.add(s.symbol.trim().toUpperCase())
+        }
+        for (const l of analysisLogsForDisplay) {
+            ids.add(l.symbol.trim().toUpperCase())
+        }
+        return Array.from(ids)
+    }, [summaries, analysisLogsForDisplay])
+
+    const { bySymbol: heatmapBySymbol, data: heatmapData } = useDailyReturnsHeatmap(heatmapSymbols, 6)
+
     return (
         <main
             className="min-h-screen bg-background text-foreground p-6 md:p-10"
@@ -141,12 +156,16 @@ export default function DashboardPage() {
                 running={running}
                 watchlistCount={items.length}
                 progressEvents={progressEvents}
+                heatmapBySymbol={heatmapBySymbol}
+                heatmapWeeks={heatmapData?.weeks ?? 6}
             />
 
             <DashboardAnalysisLogsSection
                 analysisLogs={analysisLogsForDisplay}
                 totalLogsFromApi={analysisLogs.length}
                 isSummaryLoading={isSummaryLoading}
+                heatmapBySymbol={heatmapBySymbol}
+                heatmapWeeks={heatmapData?.weeks ?? 6}
             />
         </main>
     )

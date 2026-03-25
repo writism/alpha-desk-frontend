@@ -1,9 +1,14 @@
 'use client'
 
-import { useState } from 'react'
-import { useWatchlist } from '@/features/watchlist/application/hooks/useWatchlist'
+import { useMemo, useState } from 'react'
+import { ClientPaginationBar } from '@/app/components/ClientPaginationBar'
+import { DailyReturnsHeatmapLegend } from '@/app/components/DailyReturnsHeatmapLegend'
+import { WatchlistHeatmapCollapsible } from '@/app/components/WatchlistHeatmapCollapsible'
+import { useDailyReturnsHeatmap } from '@/features/stock/application/hooks/useDailyReturnsHeatmap'
 import { useStockSearch } from '@/features/stock/application/hooks/useStockSearch'
 import type { StockItem } from '@/features/stock/domain/model/stockItem'
+import { useClientPagination } from '@/features/shared/application/hooks/useClientPagination'
+import { useWatchlist } from '@/features/watchlist/application/hooks/useWatchlist'
 
 const MARKET_BADGE: Record<string, string> = {
     KOSPI:  'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
@@ -26,6 +31,25 @@ export default function WatchlistPage() {
     const { items, isLoading, error, add, remove } = useWatchlist()
     const { results, isLoading: isSearching, error: searchError, query, search, clear } = useStockSearch()
     const [registering, setRegistering] = useState<string | null>(null)
+
+    const watchlistSymbols = useMemo(() => items.map((i) => i.symbol), [items])
+    const { bySymbol: heatmapBySymbol, data: heatmapData } = useDailyReturnsHeatmap(watchlistSymbols, 6)
+
+    const showHeatmapLegend = useMemo(
+        () => items.some((i) => !!heatmapBySymbol[i.symbol.trim().toUpperCase()]),
+        [items, heatmapBySymbol],
+    )
+
+    const {
+        page: watchlistPage,
+        totalPages: watchlistTotalPages,
+        pageItems: pagedWatchlistItems,
+        setPage: setWatchlistPage,
+        rangeStart: wlRangeStart,
+        rangeEnd: wlRangeEnd,
+        totalItems: wlTotal,
+        showPagination: watchlistShowPagination,
+    } = useClientPagination(items)
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         search(e.target.value)
@@ -111,6 +135,10 @@ export default function WatchlistPage() {
                     <span className="ml-2 text-sm font-normal text-gray-400">({items.length})</span>
                 </h2>
 
+                {!isLoading && items.length > 0 && showHeatmapLegend ? (
+                    <DailyReturnsHeatmapLegend className="mb-3 rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-gray-600 dark:bg-gray-900/40" />
+                ) : null}
+
                 {isLoading ? (
                     <div className="flex flex-col gap-2">
                         {[1, 2, 3].map((i) => (
@@ -122,26 +150,51 @@ export default function WatchlistPage() {
                         관심종목을 검색해서 추가해보세요.
                     </p>
                 ) : (
-                    <ul className="flex flex-col gap-2">
-                        {items.map((item) => (
-                            <li
-                                key={item.id}
-                                className="flex items-center justify-between px-4 py-3 border border-gray-200 rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <span className="font-mono text-xs text-gray-400 w-14">{item.symbol}</span>
-                                    <span className="font-medium text-sm">{item.name}</span>
-                                    <MarketBadge market={item.market} />
-                                </div>
-                                <button
-                                    onClick={() => remove(item.id)}
-                                    className="px-3 py-1 text-xs text-red-500 border border-red-200 rounded hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
-                                >
-                                    삭제
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
+                    <>
+                        <ul className="flex flex-col gap-2">
+                            {pagedWatchlistItems.map((item) => {
+                                const hi = heatmapBySymbol[item.symbol.trim().toUpperCase()]
+                                return (
+                                    <li
+                                        key={item.id}
+                                        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between px-4 py-3 border border-gray-200 rounded-lg dark:border-gray-700"
+                                    >
+                                        <div className="flex flex-col gap-2 min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <span className="font-mono text-sm font-semibold text-gray-400">{item.symbol}</span>
+                                                <span className="font-medium">{item.name}</span>
+                                                <MarketBadge market={item.market} />
+                                            </div>
+                                            {hi ? (
+                                                <WatchlistHeatmapCollapsible
+                                                    item={hi}
+                                                    weeks={heatmapData?.weeks ?? 6}
+                                                />
+                                            ) : null}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(item.id)}
+                                            className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded hover:bg-red-50 active:bg-red-100 transition-colors dark:hover:bg-red-950"
+                                        >
+                                            삭제
+                                        </button>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                        {watchlistShowPagination ? (
+                            <ClientPaginationBar
+                                page={watchlistPage}
+                                totalPages={watchlistTotalPages}
+                                onPageChange={setWatchlistPage}
+                                rangeStart={wlRangeStart}
+                                rangeEnd={wlRangeEnd}
+                                totalItems={wlTotal}
+                                className="mt-3"
+                            />
+                        ) : null}
+                    </>
                 )}
             </section>
         </main>

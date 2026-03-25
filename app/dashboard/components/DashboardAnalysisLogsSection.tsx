@@ -1,7 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
+import { ClientPaginationBar } from "@/app/components/ClientPaginationBar"
+import { DailyReturnsHeatmapLegend } from "@/app/components/DailyReturnsHeatmapLegend"
+import { StockDailyReturnsHeatmap } from "@/app/components/StockDailyReturnsHeatmap"
 import type { AnalysisLog } from "@/features/dashboard/domain/model/stockSummary"
+import type { HeatmapItem } from "@/features/stock/domain/model/dailyReturnsHeatmap"
+import { useClientPagination } from "@/features/shared/application/hooks/useClientPagination"
 import { SENTIMENT_BADGE, formatAnalyzedAt } from "./dashboardBadges"
 
 type Props = {
@@ -9,16 +14,36 @@ type Props = {
     /** API에서 받은 원본 로그 개수(요약과 중복 숨김으로 목록이 비었을 때 안내) */
     totalLogsFromApi?: number
     isSummaryLoading: boolean
+    heatmapBySymbol?: Record<string, HeatmapItem>
+    heatmapWeeks?: number
 }
 
 export function DashboardAnalysisLogsSection({
     analysisLogs,
     totalLogsFromApi,
     isSummaryLoading,
+    heatmapBySymbol,
+    heatmapWeeks = 6,
 }: Props) {
     const rawCount = totalLogsFromApi ?? analysisLogs.length
     const deferredAllAsCurrent = !isSummaryLoading && analysisLogs.length === 0 && rawCount > 0
     const [logsExpanded, setLogsExpanded] = useState(true)
+
+    const showHeatmapLegend = useMemo(
+        () => analysisLogs.some((l) => !!heatmapBySymbol?.[l.symbol.trim().toUpperCase()]),
+        [analysisLogs, heatmapBySymbol],
+    )
+
+    const {
+        page: logPage,
+        totalPages: logTotalPages,
+        pageItems: pagedLogs,
+        setPage: setLogPage,
+        rangeStart: logRangeStart,
+        rangeEnd: logRangeEnd,
+        totalItems: logTotal,
+        showPagination: logsShowPagination,
+    } = useClientPagination(analysisLogs)
 
     return (
         <section className="mb-10" aria-label="최근 AI 분석 로그">
@@ -72,8 +97,12 @@ export function DashboardAnalysisLogsSection({
                 </div>
             ) : logsExpanded ? (
                 <div id="dashboard-analysis-log-list" className="space-y-3">
-                    {analysisLogs.map((log, index) => {
+                    {showHeatmapLegend ? (
+                        <DailyReturnsHeatmapLegend className="rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-gray-600 dark:bg-gray-900/40" />
+                    ) : null}
+                    {pagedLogs.map((log, index) => {
                         const sentimentClass = SENTIMENT_BADGE[log.sentiment] ?? SENTIMENT_BADGE.NEUTRAL
+                        const hi = heatmapBySymbol?.[log.symbol.trim().toUpperCase()]
                         return (
                             <article
                                 key={`${log.symbol}-${log.analyzed_at}-${index}`}
@@ -94,6 +123,16 @@ export function DashboardAnalysisLogsSection({
 
                                 <p className="mb-3 text-sm leading-6 text-gray-700 dark:text-gray-300">{log.summary}</p>
 
+                                {hi ? (
+                                    <div className="mb-3">
+                                        <StockDailyReturnsHeatmap
+                                            item={hi}
+                                            weeks={heatmapWeeks}
+                                            showLegend={false}
+                                        />
+                                    </div>
+                                ) : null}
+
                                 <div className="flex flex-wrap items-center gap-2 text-xs">
                                     {log.tags.map((tag) => (
                                         <span
@@ -109,6 +148,16 @@ export function DashboardAnalysisLogsSection({
                             </article>
                         )
                     })}
+                    {logsShowPagination ? (
+                        <ClientPaginationBar
+                            page={logPage}
+                            totalPages={logTotalPages}
+                            onPageChange={setLogPage}
+                            rangeStart={logRangeStart}
+                            rangeEnd={logRangeEnd}
+                            totalItems={logTotal}
+                        />
+                    ) : null}
                 </div>
             ) : (
                 <p id="dashboard-analysis-log-list" className="text-sm text-gray-500">
