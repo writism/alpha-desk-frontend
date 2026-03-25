@@ -79,16 +79,12 @@ export default function Navbar() {
                         Home
                     </Link>
 
-                    {isLoggedIn && (
-                        <>
-                            <Link href="/dashboard" className={menuItemClass("/dashboard")}>
-                                Dashboard
-                            </Link>
-                            <Link href="/watchlist" className={menuItemClass("/watchlist")}>
-                                Watchlist
-                            </Link>
-                        </>
-                    )}
+                    <Link href="/dashboard" className={menuItemClass("/dashboard")}>
+                        Dashboard
+                    </Link>
+                    <Link href="/watchlist" className={menuItemClass("/watchlist")}>
+                        Watchlist
+                    </Link>
 
                     {!isLoading &&
                         (isLoggedIn ? (
