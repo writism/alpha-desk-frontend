@@ -1,10 +1,16 @@
+"use client"
+
+import { useState } from "react"
 import type { PipelineProgressEvent } from "@/features/dashboard/domain/model/pipelineProgressEvent"
 import type { StockSummary } from "@/features/dashboard/domain/model/stockSummary"
 import StockSummaryCard from "../../components/StockSummaryCard"
 import { DashboardPipelineProgressPanel } from "./DashboardPipelineProgressPanel"
 
+type Tab = "news" | "report"
+
 type Props = {
     summaries: StockSummary[]
+    reportSummaries: StockSummary[]
     isSummaryLoading: boolean
     running: boolean
     watchlistCount: number
@@ -13,16 +19,55 @@ type Props = {
 
 export function DashboardSummarySection({
     summaries,
+    reportSummaries,
     isSummaryLoading,
     running,
     watchlistCount,
     progressEvents,
 }: Props) {
+    const [activeTab, setActiveTab] = useState<Tab>("news")
     const showInitialSkeleton = isSummaryLoading && !running
+    const activeSummaries = activeTab === "news" ? summaries : reportSummaries
 
     return (
         <section className="mb-10" aria-label="AI 분석 요약" aria-busy={running || undefined}>
             <h2 className="text-lg font-semibold mb-3">AI 분석 요약</h2>
+
+            {/* 탭 */}
+            <div className="flex gap-1 mb-4 border-b border-gray-200 dark:border-gray-700">
+                <button
+                    type="button"
+                    onClick={() => setActiveTab("news")}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                        activeTab === "news"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                >
+                    뉴스 분석
+                    {summaries.length > 0 && (
+                        <span className="ml-1.5 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-full px-1.5 py-0.5">
+                            {summaries.length}
+                        </span>
+                    )}
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setActiveTab("report")}
+                    className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                        activeTab === "report"
+                            ? "border-blue-600 text-blue-600 dark:text-blue-400"
+                            : "border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    }`}
+                >
+                    공시·리포트
+                    {reportSummaries.length > 0 && (
+                        <span className="ml-1.5 text-xs bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 rounded-full px-1.5 py-0.5">
+                            {reportSummaries.length}
+                        </span>
+                    )}
+                </button>
+            </div>
 
             {showInitialSkeleton ? (
                 <div className="space-y-3">
@@ -44,9 +89,11 @@ export function DashboardSummarySection({
                         </div>
                     )}
                 </div>
-            ) : summaries.length === 0 ? (
+            ) : activeSummaries.length === 0 ? (
                 <div className="py-10 text-center border border-dashed border-gray-300 rounded-lg dark:border-gray-600">
-                    <p className="text-gray-500 mb-4">아직 분석된 종목이 없습니다.</p>
+                    <p className="text-gray-500 mb-4">
+                        {activeTab === "news" ? "아직 분석된 뉴스가 없습니다." : "아직 분석된 공시·리포트가 없습니다."}
+                    </p>
                     <p className="text-sm text-gray-500 mb-4">
                         상단의 &quot;선택 종목 분석&quot; 버튼으로 분석을 실행할 수 있습니다.
                     </p>
@@ -61,7 +108,7 @@ export function DashboardSummarySection({
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {summaries.map((stock) => (
+                    {activeSummaries.map((stock) => (
                         <StockSummaryCard
                             key={stock.symbol}
                             symbol={stock.symbol}
@@ -71,6 +118,7 @@ export function DashboardSummarySection({
                             sentiment={stock.sentiment}
                             sentiment_score={stock.sentiment_score}
                             confidence={stock.confidence}
+                            url={stock.url}
                         />
                     ))}
                 </div>

@@ -12,6 +12,7 @@ import { DashboardWatchlistSection } from "./components/DashboardWatchlistSectio
 export default function DashboardPage() {
     const {
         summaries,
+        reportSummaries,
         analysisLogs,
         isLoading: isSummaryLoading,
         error: summaryError,
@@ -133,6 +134,7 @@ export default function DashboardPage() {
 
             <DashboardSummarySection
                 summaries={summaries}
+                reportSummaries={reportSummaries}
                 isSummaryLoading={isSummaryLoading}
                 running={running}
                 watchlistCount={items.length}

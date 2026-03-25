@@ -9,6 +9,7 @@ import {
 import {
     fetchAnalysisLogs,
     fetchDashboardSummaries,
+    fetchReportSummaries,
     runPipeline,
     runPipelineStream,
 } from "../../infrastructure/api/dashboardApi"
@@ -32,6 +33,7 @@ function formatPipelineError(err: unknown): string {
 
 export const useDashboard = () => {
     const [summaries, setSummaries] = useState<StockSummary[]>([])
+    const [reportSummaries, setReportSummaries] = useState<StockSummary[]>([])
     const [analysisLogs, setAnalysisLogs] = useState<AnalysisLog[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
@@ -42,11 +44,13 @@ export const useDashboard = () => {
         setIsLoading(true)
         setError(null)
         try {
-            const [summaryData, logData] = await Promise.all([
+            const [summaryData, reportData, logData] = await Promise.all([
                 fetchDashboardSummaries(),
+                fetchReportSummaries(),
                 fetchAnalysisLogs(),
             ])
             setSummaries(summaryData)
+            setReportSummaries(reportData)
             setAnalysisLogs(logData)
         } catch (err) {
             setError(formatLoadError(err))
@@ -92,6 +96,7 @@ export const useDashboard = () => {
 
     return {
         summaries,
+        reportSummaries,
         analysisLogs,
         isLoading,
         error,

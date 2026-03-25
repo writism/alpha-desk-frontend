@@ -21,6 +21,8 @@ export interface StockSummary {
     sentiment: Sentiment
     sentiment_score: number
     confidence: number
+    source_type?: 'NEWS' | 'DISCLOSURE' | 'REPORT'
+    url?: string
 }
 
 export interface AnalysisLog {
