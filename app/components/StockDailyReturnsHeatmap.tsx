@@ -24,7 +24,7 @@ function calcMatchResult(sentimentScore: number, up: number, down: number): Matc
     const total = up + down
     if (total === 0) return 'UNCLEAR'
     const ratio = up / total
-    const priceDir: Direction = ratio > 0.55 ? 'UP' : ratio < 0.45 ? 'DOWN' : 'NEUTRAL'
+    const priceDir: Direction = ratio > 0.5 ? 'UP' : ratio < 0.5 ? 'DOWN' : 'NEUTRAL'
     if (priceDir === 'NEUTRAL') return 'UNCLEAR'
 
     return sentimentDir === priceDir ? 'MATCH' : 'MISMATCH'

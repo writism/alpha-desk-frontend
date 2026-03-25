@@ -129,6 +129,7 @@ export function DashboardAnalysisLogsSection({
                                             item={hi}
                                             weeks={heatmapWeeks}
                                             showLegend={false}
+                                            sentimentScore={log.sentiment_score}
                                         />
                                     </div>
                                 ) : null}
