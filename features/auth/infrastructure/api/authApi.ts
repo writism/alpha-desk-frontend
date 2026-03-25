@@ -55,22 +55,6 @@ export async function fetchAuthMe(): Promise<AuthMeResponse> {
     return res.json()
 }
 
-export interface AuthMeResponse {
-    is_registered: boolean
-    nickname: string
-    email: string
-    account_id?: string
-}
-
-export async function fetchAuthMe(): Promise<AuthMeResponse> {
-    const res = await fetch(`${env.apiBaseUrl}/authentication/me`, {
-        method: "GET",
-        credentials: "include",
-    })
-    if (!res.ok) throw new ApiError(res.status, "인증 정보 조회 실패")
-    return res.json()
-}
-
 export async function registerUser(params: { nickname: string; email: string }): Promise<string> {
     const res = await fetch(`${env.apiBaseUrl}/account/register`, {
         method: "POST",
