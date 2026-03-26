@@ -22,7 +22,6 @@ interface StockSummaryCardProps {
   /** BL-FE-43: 공유 기능. analyzed_at 제공 시 액션 바 표시 */
   analyzed_at?: string;
   isLoggedIn?: boolean;
-  source_type?: string;
 }
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -57,12 +56,11 @@ const SENTIMENT_LABEL = {
 export default function StockSummaryCard({
   symbol, name, summary, tags,
   sentiment, sentiment_score, confidence,
-  source_type,
+  source_type = 'NEWS',
   url,
   heatmap,
   analyzed_at,
   isLoggedIn = false,
-  source_type = 'NEWS',
 }: StockSummaryCardProps) {
   const wrapperClass =
     'border border-gray-200 dark:border-gray-700 rounded-xl bg-background flex flex-col' +
