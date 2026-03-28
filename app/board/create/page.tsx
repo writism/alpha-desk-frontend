@@ -25,8 +25,8 @@ export default function BoardCreatePage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const ok = await submit()
-        if (ok) router.push("/board")
+        const boardId = await submit()
+        if (boardId !== null) router.push(`/board/read/${boardId}`)
     }
 
     return (

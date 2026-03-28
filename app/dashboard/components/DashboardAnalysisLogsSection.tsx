@@ -7,11 +7,28 @@ import { StockDailyReturnsHeatmap } from "@/app/components/StockDailyReturnsHeat
 import type { AnalysisLog } from "@/features/dashboard/domain/model/stockSummary"
 import type { HeatmapItem } from "@/features/stock/domain/model/dailyReturnsHeatmap"
 import { useClientPagination } from "@/features/shared/application/hooks/useClientPagination"
-import { SENTIMENT_BADGE, formatAnalyzedAt } from "./dashboardBadges"
+import { formatAnalyzedAt } from "./dashboardBadges"
+
+const SOURCE_LABEL: Record<string, string> = {
+    NEWS: '뉴스',
+    DISCLOSURE: '공시',
+    REPORT: '재무',
+}
+
+const SENTIMENT_STYLE: Record<string, string> = {
+    POSITIVE: 'border-tertiary text-tertiary',
+    NEGATIVE: 'border-error text-error',
+    NEUTRAL:  'border-on-surface-variant text-on-surface-variant',
+}
+
+const SENTIMENT_LABEL: Record<string, string> = {
+    POSITIVE: '긍정',
+    NEGATIVE: '부정',
+    NEUTRAL:  '중립',
+}
 
 type Props = {
     analysisLogs: AnalysisLog[]
-    /** API에서 받은 원본 로그 개수(요약과 중복 숨김으로 목록이 비었을 때 안내) */
     totalLogsFromApi?: number
     isSummaryLoading: boolean
     heatmapBySymbol?: Record<string, HeatmapItem>
@@ -47,26 +64,27 @@ export function DashboardAnalysisLogsSection({
 
     return (
         <section className="mb-10" aria-label="최근 AI 분석 로그">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-outline pb-3">
                 <div>
-                    <h2 className="text-lg font-semibold">최근 AI 분석 로그</h2>
-                    <p className="text-sm text-gray-500">
+                    <div className="font-mono text-xs font-bold text-on-surface uppercase tracking-widest">
+                        AI_ANALYSIS_LOG
+                    </div>
+                    <div className="font-mono text-xs text-on-surface-variant mt-0.5">
                         가장 최근에 생성된 AI 분석 내용부터 확인할 수 있습니다.
-                    </p>
+                    </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-3 font-mono text-xs">
                     {analysisLogs.length > 0 && (
-                        <span className="text-xs text-gray-500">{analysisLogs.length}개 로그</span>
+                        <span className="text-outline">{analysisLogs.length}개 로그</span>
                     )}
                     {analysisLogs.length > 0 && (
                         <button
                             type="button"
                             onClick={() => setLogsExpanded((v) => !v)}
-                            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                            className="border border-outline px-2 py-1 uppercase hover:bg-surface-container"
                             aria-expanded={logsExpanded}
-                            aria-controls="dashboard-analysis-log-list"
                         >
-                            {logsExpanded ? "로그 접기" : "로그 펼치기"}
+                            {logsExpanded ? "COLLAPSE" : "EXPAND"}
                         </button>
                     )}
                 </div>
@@ -75,80 +93,104 @@ export function DashboardAnalysisLogsSection({
             {isSummaryLoading ? (
                 <div className="space-y-3">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-28 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
+                        <div key={i} className="h-28 bg-surface-container animate-pulse" />
                     ))}
                 </div>
             ) : deferredAllAsCurrent ? (
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center dark:border-gray-600">
-                    <p className="mb-2 text-gray-500">
-                        방금 분석한 내용은 위 <strong className="font-medium text-gray-600 dark:text-gray-400">AI 분석 요약</strong>
-                        에만 표시됩니다.
+                <div className="border border-dashed border-outline px-6 py-10 text-center">
+                    <p className="font-mono text-sm text-on-surface-variant mb-1">
+                        방금 분석한 내용은 위 <strong className="text-on-surface">AI 분석 요약</strong>에만 표시됩니다.
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-mono text-xs text-outline">
                         같은 종목에 새 분석이 실행되면, 이전 결과가 여기 로그에 쌓입니다.
                     </p>
                 </div>
             ) : analysisLogs.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center dark:border-gray-600">
-                    <p className="mb-2 text-gray-500">아직 누적된 분석 로그가 없습니다.</p>
-                    <p className="text-sm text-gray-500">
-                        분석을 실행하려면 화면 상단의 &quot;선택 종목 분석&quot; 버튼을 사용하세요.
+                <div className="border border-dashed border-outline px-6 py-10 text-center">
+                    <p className="font-mono text-sm text-on-surface-variant mb-1">아직 누적된 분석 로그가 없습니다.</p>
+                    <p className="font-mono text-xs text-outline">
+                        분석을 실행하려면 화면 상단의 &quot;RUN_ANALYSIS&quot; 버튼을 사용하세요.
                     </p>
                 </div>
             ) : logsExpanded ? (
                 <div id="dashboard-analysis-log-list" className="space-y-3">
                     {showHeatmapLegend ? (
-                        <DailyReturnsHeatmapLegend className="rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-2 dark:border-gray-600 dark:bg-gray-900/40" />
+                        <DailyReturnsHeatmapLegend className="border border-outline-variant bg-surface-container px-3 py-2" />
                     ) : null}
+
                     {pagedLogs.map((log, index) => {
-                        const sentimentClass = SENTIMENT_BADGE[log.sentiment] ?? SENTIMENT_BADGE.NEUTRAL
+                        const sentimentStyle = SENTIMENT_STYLE[log.sentiment] ?? SENTIMENT_STYLE.NEUTRAL
+                        const sentimentLabel = SENTIMENT_LABEL[log.sentiment] ?? log.sentiment
                         const hi = heatmapBySymbol?.[log.symbol.trim().toUpperCase()]
+                        const scoreStr = `${log.sentiment_score > 0 ? '+' : ''}${log.sentiment_score.toFixed(2)}`
+
                         return (
                             <article
                                 key={`${log.symbol}-${log.analyzed_at}-${index}`}
-                                className="rounded-lg border border-gray-200 bg-white/60 px-4 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-900/40"
+                                className="border border-outline bg-surface-container-low"
                             >
-                                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <span className="font-mono text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                            {log.symbol}
-                                        </span>
-                                        <span className="text-sm font-medium">{log.name}</span>
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${sentimentClass}`}>
-                                            {log.sentiment}
-                                        </span>
+                                <div className="p-5 flex flex-col gap-3">
+                                    {/* Header */}
+                                    <div className="flex items-center justify-between flex-wrap gap-2">
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <span className="font-mono text-sm font-bold text-outline">{log.symbol}</span>
+                                            <span className="font-mono text-base font-bold text-on-surface">{log.name}</span>
+                                            {log.source_type && SOURCE_LABEL[log.source_type] && (
+                                                <span className="border border-outline font-mono text-xs px-1.5 py-0.5 text-on-surface-variant uppercase">
+                                                    {SOURCE_LABEL[log.source_type]}
+                                                </span>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`border font-mono text-xs px-2 py-0.5 font-bold ${sentimentStyle}`}>
+                                                {sentimentLabel} {scoreStr}
+                                            </span>
+                                            <span className="font-mono text-xs text-outline">
+                                                {formatAnalyzedAt(log.analyzed_at)}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div className="text-xs text-gray-500">{formatAnalyzedAt(log.analyzed_at)}</div>
-                                </div>
 
-                                <p className="mb-3 text-sm leading-6 text-gray-700 dark:text-gray-300">{log.summary}</p>
+                                    {/* Summary */}
+                                    <p className="font-mono text-sm text-on-surface leading-relaxed">{log.summary}</p>
 
-                                {hi ? (
-                                    <div className="mb-3">
+                                    {/* Heatmap */}
+                                    {hi ? (
                                         <StockDailyReturnsHeatmap
                                             item={hi}
                                             weeks={heatmapWeeks}
                                             showLegend={false}
                                             sentimentScore={log.sentiment_score}
                                         />
-                                    </div>
-                                ) : null}
+                                    ) : null}
 
-                                <div className="flex flex-wrap items-center gap-2 text-xs">
-                                    {log.tags.map((tag) => (
-                                        <span
-                                            key={`${log.symbol}-${log.analyzed_at}-${tag}`}
-                                            className="rounded-full bg-blue-50 px-2 py-1 font-medium text-blue-700 dark:bg-blue-950 dark:text-blue-300"
-                                        >
-                                            #{tag}
+                                    {/* Tags + Confidence */}
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                        {log.tags.map((tag) => (
+                                            <span
+                                                key={`${log.symbol}-${log.analyzed_at}-${tag}`}
+                                                className="border border-outline font-mono text-xs px-2 py-0.5 text-on-surface-variant"
+                                            >
+                                                #{tag}
+                                            </span>
+                                        ))}
+                                        <span className="font-mono text-xs text-outline ml-auto">
+                                            신뢰도 {(log.confidence * 100).toFixed(0)}%
                                         </span>
-                                    ))}
-                                    <span className="text-gray-500">신뢰도 {(log.confidence * 100).toFixed(0)}%</span>
-                                    <span className="text-gray-500">감성 점수 {log.sentiment_score.toFixed(2)}</span>
+                                    </div>
+
+                                    {/* Confidence bar */}
+                                    <div className="h-1 bg-surface-container-highest">
+                                        <div
+                                            className="h-full bg-primary"
+                                            style={{ width: `${log.confidence * 100}%` }}
+                                        />
+                                    </div>
                                 </div>
                             </article>
                         )
                     })}
+
                     {logsShowPagination ? (
                         <ClientPaginationBar
                             page={logPage}
@@ -161,8 +203,8 @@ export function DashboardAnalysisLogsSection({
                     ) : null}
                 </div>
             ) : (
-                <p id="dashboard-analysis-log-list" className="text-sm text-gray-500">
-                    로그 목록을 접었습니다. 위의 &quot;로그 펼치기&quot;로 다시 볼 수 있습니다.
+                <p id="dashboard-analysis-log-list" className="font-mono text-sm text-outline">
+                    로그 목록을 접었습니다. &quot;EXPAND&quot; 버튼으로 다시 볼 수 있습니다.
                 </p>
             )}
         </section>

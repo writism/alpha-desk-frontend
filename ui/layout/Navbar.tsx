@@ -29,7 +29,7 @@ function MenuIcon({ open }: { open: boolean }) {
 }
 
 export default function Navbar() {
-    const { state, logout } = useAuth()
+    const { state, logout, loadUser } = useAuth()
     const router = useRouter()
     const pathname = usePathname()
     const panelId = useId()
@@ -39,6 +39,10 @@ export default function Navbar() {
     const isLoading = state.status === "LOADING" || state.status === "PENDING_TERMS"
 
     const closeMobile = useCallback(() => setMobileOpen(false), [])
+
+    useEffect(() => {
+        loadUser()
+    }, [loadUser])
 
     const menuItemClass = (href: string) =>
         `${navbarStyles.menuItem.base} ${pathname === href ? navbarStyles.menuItem.active : navbarStyles.menuItem.inactive}`
@@ -76,14 +80,19 @@ export default function Navbar() {
                 {/* Desktop */}
                 <div className={navbarStyles.menuList}>
                     <Link href="/" className={menuItemClass("/")}>
-                        Home
+                        홈
                     </Link>
-
                     <Link href="/dashboard" className={menuItemClass("/dashboard")}>
-                        Dashboard
+                        대시보드
                     </Link>
                     <Link href="/watchlist" className={menuItemClass("/watchlist")}>
-                        Watchlist
+                        관심종목
+                    </Link>
+                    <Link href="/board" className={menuItemClass("/board")}>
+                        게시판
+                    </Link>
+                    <Link href="/youtube" className={menuItemClass("/youtube")}>
+                        영상
                     </Link>
 
                     {!isLoading &&
@@ -115,17 +124,17 @@ export default function Navbar() {
                                     onClick={handleLogout}
                                     className={navbarStyles.logoutButton}
                                 >
-                                    Logout
+                                    로그아웃
                                 </button>
                             </>
                         ) : (
                             <Link href="/login" className={navbarStyles.loginButton}>
-                                Login
+                                로그인
                             </Link>
                         ))}
                 </div>
 
-                {/* Mobile: 햄버거 또는 Login */}
+                {/* Mobile: 햄버거 또는 로그인 */}
                 <div className="flex items-center gap-2 md:hidden">
                     {!isLoading &&
                         (isLoggedIn ? (
@@ -141,7 +150,7 @@ export default function Navbar() {
                             </button>
                         ) : (
                             <Link href="/login" className={navbarStyles.loginButton}>
-                                Login
+                                로그인
                             </Link>
                         ))}
                 </div>
@@ -175,21 +184,35 @@ export default function Navbar() {
                         </div>
                         <div className={navbarStyles.drawerBody}>
                             <Link href="/" className={drawerLinkClass("/")} onClick={closeMobile}>
-                                Home
+                                홈
                             </Link>
                             <Link
                                 href="/dashboard"
                                 className={drawerLinkClass("/dashboard")}
                                 onClick={closeMobile}
                             >
-                                Dashboard
+                                대시보드
                             </Link>
                             <Link
                                 href="/watchlist"
                                 className={drawerLinkClass("/watchlist")}
                                 onClick={closeMobile}
                             >
-                                Watchlist
+                                관심종목
+                            </Link>
+                            <Link
+                                href="/board"
+                                className={drawerLinkClass("/board")}
+                                onClick={closeMobile}
+                            >
+                                게시판
+                            </Link>
+                            <Link
+                                href="/youtube"
+                                className={drawerLinkClass("/youtube")}
+                                onClick={closeMobile}
+                            >
+                                영상
                             </Link>
 
                             {state.status === "AUTHENTICATED" && (
@@ -220,7 +243,7 @@ export default function Navbar() {
                                 className={`${navbarStyles.logoutButton} w-full`}
                                 onClick={handleLogout}
                             >
-                                Logout
+                                로그아웃
                             </button>
                         </div>
                     </div>

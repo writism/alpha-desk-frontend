@@ -11,11 +11,15 @@ const oauthButtons = [
 ]
 
 export default function LoginPage() {
-    const { state } = useAuth()
+    const { state, loadUser } = useAuth()
     const router = useRouter()
     const searchParams = useSearchParams()
     const reason = searchParams.get("reason")
     const expiredSignupSession = reason === "signup-session-expired"
+
+    useEffect(() => {
+        loadUser()
+    }, [loadUser])
 
     useEffect(() => {
         if (state.status === "AUTHENTICATED") {
@@ -25,8 +29,10 @@ export default function LoginPage() {
 
     if (state.status === "LOADING") {
         return (
-            <div className="flex justify-center items-center h-screen">
-                <p className="text-gray-500">인증 확인 중...</p>
+            <div className="flex justify-center items-center h-full">
+                <span className="font-mono text-[11px] text-on-surface-variant uppercase tracking-widest animate-pulse">
+                    AUTH_VERIFY...
+                </span>
             </div>
         )
     }
@@ -36,15 +42,30 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex flex-col justify-center items-center h-screen gap-6">
-            <h1 className="text-2xl font-bold">로그인</h1>
-            {expiredSignupSession && (
-                <p className="max-w-sm rounded border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 text-sm text-yellow-200">
-                    회원가입 세션이 만료되었습니다. 카카오 로그인을 다시 진행해 주세요.
+        <div className="flex flex-col justify-center items-center h-full gap-6">
+            <div className="w-full max-w-sm border border-outline bg-surface-container-low p-8">
+                <div className="mb-6 border-b border-outline pb-4">
+                    <div className="font-mono font-bold text-primary text-base uppercase tracking-tighter">
+                        SYS_LOGIN
+                    </div>
+                    <div className="font-mono text-[10px] text-on-surface-variant tracking-widest mt-0.5">
+                        ALPHA_DESK / AUTH_MODULE
+                    </div>
+                </div>
+
+                {expiredSignupSession && (
+                    <div className="mb-4 border border-outline px-3 py-2 font-mono text-[11px] text-error bg-error-container/20">
+                        [WARN] 회원가입 세션이 만료되었습니다. 카카오 로그인을 다시 진행해 주세요.
+                    </div>
+                )}
+
+                <div className="flex flex-col gap-3">
+                    {oauthButtons}
+                </div>
+
+                <p className="mt-6 font-mono text-[9px] text-outline tracking-widest text-center">
+                    AI 분석 참고용 · 투자 추천 아님
                 </p>
-            )}
-            <div className="flex flex-col gap-3">
-                {oauthButtons}
             </div>
         </div>
     )
