@@ -5,10 +5,8 @@ import { usePathname } from "next/navigation"
 
 const NAV_ITEMS = [
     { href: "/", label: "HOME", icon: "home", exact: true },
-    { href: "/dashboard", label: "DASH", icon: "show_chart" },
-    { href: "/watchlist", label: "WATCH", icon: "visibility" },
     { href: "/board", label: "BOARD", icon: "forum" },
-    { href: "/stock-recommendation", label: "추천", icon: "trending_up" },
+    { href: "/stock-recommendation", label: "PICKS", icon: "trending_up" },
     { href: "/youtube", label: "VIDEO", icon: "play_circle" },
 ]
 

@@ -7,10 +7,11 @@ import { useAuth } from "@/features/auth/application/hooks/useAuth"
 import { useTheme } from "@/features/theme/application/hooks/useTheme"
 
 const NAV_ITEMS = [
+    { href: "/", label: "HOME", exact: true },
     { href: "/dashboard", label: "DASHBOARD" },
     { href: "/watchlist", label: "WATCHLIST" },
     { href: "/board", label: "BOARD" },
-    { href: "/stock-recommendation", label: "주식 추천" },
+    { href: "/stock-recommendation", label: "PICKS" },
     { href: "/youtube", label: "VIDEOS" },
 ]
 
@@ -42,12 +43,12 @@ export default function TopBar() {
                 </Link>
 
                 <nav className="hidden md:flex items-center gap-4 font-headline uppercase tracking-tighter text-sm font-bold h-10">
-                    {NAV_ITEMS.map(({ href, label }) => (
+                    {NAV_ITEMS.map(({ href, label, exact }) => (
                         <Link
                             key={href}
                             href={href}
                             className={
-                                pathname.startsWith(href)
+                                (exact ? pathname === href : pathname.startsWith(href))
                                     ? "text-white border-b-2 border-inverse-primary pb-1"
                                     : "text-inverse-on-surface opacity-70 hover:text-white transition-none px-1"
                             }

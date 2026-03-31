@@ -8,7 +8,7 @@ const NAV_ITEMS = [
     { href: "/dashboard", label: "DASHBOARD", icon: "show_chart" },
     { href: "/watchlist", label: "WATCHLIST", icon: "visibility" },
     { href: "/board", label: "BOARD", icon: "forum" },
-    { href: "/stock-recommendation", label: "주식 추천", icon: "trending_up" },
+    { href: "/stock-recommendation", label: "STOCK_PICKS", icon: "trending_up" },
     { href: "/youtube", label: "VIDEOS", icon: "play_circle" },
 ]
 
