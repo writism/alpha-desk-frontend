@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:33333";
-
 async function handler(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
+  const BACKEND_URL = process.env.BACKEND_URL ?? "http://localhost:33333";
   const { path } = await context.params;
   const url = `${BACKEND_URL}/${path.join("/")}${request.nextUrl.search}`;
+  console.log("[proxy] BACKEND_URL:", BACKEND_URL, "url:", url);
 
   const requestHeaders = new Headers();
   const cookie = request.headers.get("cookie");
