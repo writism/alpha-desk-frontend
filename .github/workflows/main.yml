@@ -1,4 +1,4 @@
-name: Deploy multi-agent-ui via Docker
+name: Deploy alpha-desk-frontend via Docker
 
 on:
   push:
