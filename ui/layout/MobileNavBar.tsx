@@ -10,6 +10,7 @@ const NAV_ITEMS = [
     { href: "/board", label: "BOARD", icon: "forum" },
     { href: "/news", label: "NEWS", icon: "newspaper" },
     { href: "/stock-recommendation", label: "PICKS", icon: "trending_up" },
+    { href: "/invest", label: "INVEST", icon: "account_balance" },
     { href: "/youtube", label: "VIDEO", icon: "play_circle" },
 ]
 
