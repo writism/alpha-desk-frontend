@@ -94,6 +94,12 @@ export default function Navbar() {
                     <Link href="/news" className={menuItemClass("/news")}>
                         뉴스
                     </Link>
+                    <Link href="/stock-recommendation" className={menuItemClass("/stock-recommendation")}>
+                        주식추천
+                    </Link>
+                    <Link href="/invest" className={menuItemClass("/invest")}>
+                        투자판단
+                    </Link>
                     <Link href="/youtube" className={menuItemClass("/youtube")}>
                         영상
                     </Link>
@@ -216,6 +222,20 @@ export default function Navbar() {
                                 onClick={closeMobile}
                             >
                                 뉴스
+                            </Link>
+                            <Link
+                                href="/stock-recommendation"
+                                className={drawerLinkClass("/stock-recommendation")}
+                                onClick={closeMobile}
+                            >
+                                주식추천
+                            </Link>
+                            <Link
+                                href="/invest"
+                                className={drawerLinkClass("/invest")}
+                                onClick={closeMobile}
+                            >
+                                투자판단
                             </Link>
                             <Link
                                 href="/youtube"
