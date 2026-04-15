@@ -51,6 +51,11 @@ jobs:
       - name: Pull latest image
         run: docker pull ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
 
+      - name: Ensure network exists
+        run: |
+          docker network inspect alpha-terminal-frontend_multi-agent-net >/dev/null 2>&1 || \
+          docker network create alpha-terminal-frontend_multi-agent-net
+
       - name: Stop old container
         run: |
           docker stop alphadesk-web || true
@@ -63,7 +68,7 @@ jobs:
             --name alphadesk-web \
             -p 3000:3000 \
             -e BACKEND_URL=http://alphadesk-api:33333 \
-            --network alphadesk-network \
+            --network alpha-terminal-frontend_multi-agent-net \
             --restart unless-stopped \
             ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
 
