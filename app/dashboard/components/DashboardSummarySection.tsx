@@ -20,6 +20,7 @@ type Props = {
     heatmapBySymbol?: Record<string, HeatmapItem>
     heatmapWeeks?: number
     isLoggedIn?: boolean
+    onCardClick?: (symbol: string, name: string) => void
 }
 
 export function DashboardSummarySection({
@@ -32,6 +33,7 @@ export function DashboardSummarySection({
     heatmapBySymbol,
     heatmapWeeks = 6,
     isLoggedIn = false,
+    onCardClick,
 }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>("news")
     const activeSummaries = activeTab === "news" ? summaries : reportSummaries
@@ -135,6 +137,7 @@ export function DashboardSummarySection({
                                     analyzed_at={stock.analyzed_at}
                                     isLoggedIn={isLoggedIn}
                                     showBoardPublishButton={isLoggedIn}
+                                    onCardClick={onCardClick ? () => onCardClick(stock.symbol, stock.name) : undefined}
                                 />
                             )
                         })}

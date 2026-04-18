@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import useSWR from "swr"
@@ -10,6 +11,7 @@ import StockSummaryCard from "@/app/components/StockSummaryCard"
 import { ShareActionBar } from "@/features/share/ui/components/ShareActionBar"
 import { fetchSharedCard } from "@/features/share/infrastructure/api/shareApi"
 import type { HeatmapItem } from "@/features/stock/domain/model/dailyReturnsHeatmap"
+import { useRecordRecentlyViewed } from "@/features/profile/application/hooks/useRecordRecentlyViewed"
 
 function isSentiment(v: string): v is "POSITIVE" | "NEGATIVE" | "NEUTRAL" {
     return v === "POSITIVE" || v === "NEGATIVE" || v === "NEUTRAL"
@@ -38,6 +40,7 @@ export default function BoardReadPage() {
         authState.status === "AUTHENTICATED" ? authState.user.accountId : ""
 
     const { post, isLoading, error, isDeleting, deletePost } = useBoardRead(boardId)
+    const recordRecentlyViewed = useRecordRecentlyViewed()
 
     const linkedCardId = post?.shared_card_id ?? null
 
@@ -51,6 +54,11 @@ export default function BoardReadPage() {
         heatmapSymbol ? ["board-heatmap", heatmapSymbol] : null,
         () => fetchHeatmapForSymbol(heatmapSymbol!)
     )
+
+    useEffect(() => {
+        if (!sharedCard || sharedCard.symbol === "BOARD" || !post?.shared_card_id) return
+        recordRecentlyViewed({ symbol: sharedCard.symbol, name: sharedCard.name })
+    }, [sharedCard?.symbol, sharedCard?.name, post?.shared_card_id, recordRecentlyViewed])
 
     const handleDelete = async () => {
         if (!confirm("게시물을 삭제하시겠습니까?")) return

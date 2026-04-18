@@ -30,6 +30,7 @@ interface StockSummaryCardProps {
   snsShareEnabled?: boolean
   /** 대시보드 등에서 게시판 등록 버튼 */
   showBoardPublishButton?: boolean
+  onCardClick?: () => void
 }
 
 const SOURCE_LABEL: Record<string, string> = {
@@ -69,6 +70,7 @@ export default function StockSummaryCard({
   initialUserHasLiked = false,
   snsShareEnabled = true,
   showBoardPublishButton = false,
+  onCardClick,
 }: StockSummaryCardProps) {
   const sentimentStyle = sentiment ? SENTIMENT_STYLE[sentiment] : SENTIMENT_STYLE.NEUTRAL
   const sentimentLabel = sentiment ? SENTIMENT_LABEL[sentiment] : '중립'
@@ -153,7 +155,7 @@ export default function StockSummaryCard({
   return (
     <div className={`border border-outline bg-surface-container-low flex flex-col${url ? ' hover:border-primary' : ''}`}>
       {url ? (
-        <a href={url} target="_blank" rel="noopener noreferrer" className="flex-1">
+        <a href={url} target="_blank" rel="noopener noreferrer" onClick={onCardClick} className="flex-1">
           {cardContent}
         </a>
       ) : (

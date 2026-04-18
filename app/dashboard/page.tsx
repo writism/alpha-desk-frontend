@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useDashboard } from "@/features/dashboard/application/hooks/useDashboard"
 import { excludeCurrentSummaryFromLogs } from "@/features/dashboard/domain/excludeCurrentSummaryFromLogs"
 import { useDailyReturnsHeatmap } from "@/features/stock/application/hooks/useDailyReturnsHeatmap"
 import { useWatchlist } from "@/features/watchlist/application/hooks/useWatchlist"
 import { useAuth } from "@/features/auth/application/hooks/useAuth"
+import { useRecordRecentlyViewed } from "@/features/profile/application/hooks/useRecordRecentlyViewed"
 import { DashboardAnalysisLogsSection } from "./components/DashboardAnalysisLogsSection"
 import { DashboardPipelineResult } from "./components/DashboardPipelineResult"
 import { DashboardSummarySection } from "./components/DashboardSummarySection"
@@ -14,6 +15,14 @@ import { DashboardWatchlistSection } from "./components/DashboardWatchlistSectio
 export default function DashboardPage() {
     const { state: authState } = useAuth()
     const isLoggedIn = authState.status === "AUTHENTICATED"
+    const recordRecentlyViewed = useRecordRecentlyViewed()
+
+    const handleCardClick = useCallback(
+        (symbol: string, name: string) => {
+            recordRecentlyViewed({ symbol, name })
+        },
+        [recordRecentlyViewed],
+    )
     const {
         summaries,
         reportSummaries,
@@ -165,6 +174,7 @@ export default function DashboardPage() {
                 heatmapBySymbol={heatmapBySymbol}
                 heatmapWeeks={heatmapData?.weeks ?? 6}
                 isLoggedIn={isLoggedIn}
+                onCardClick={handleCardClick}
             />
 
             <DashboardAnalysisLogsSection

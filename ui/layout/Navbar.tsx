@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useCallback, useEffect, useId, useState } from "react"
 import { useAuth } from "@/features/auth/application/hooks/useAuth"
 import { navbarStyles } from "./navbar.styles"
+import NotificationBell from "@/features/notification/ui/components/NotificationBell"
 
 function MenuIcon({ open }: { open: boolean }) {
     return (
@@ -128,6 +129,9 @@ export default function Navbar() {
                                         ) : null}
                                     </div>
                                 )}
+                                <Link href="/profile" className={navbarStyles.loginButton}>
+                                    프로필
+                                </Link>
                                 <button
                                     type="button"
                                     onClick={handleLogout}
@@ -142,6 +146,9 @@ export default function Navbar() {
                             </Link>
                         ))}
                 </div>
+
+                {/* 알림 벨 - 로그인 시 항상 표시 */}
+                {isLoggedIn && <NotificationBell />}
 
                 {/* Mobile: 햄버거 또는 로그인 */}
                 <div className="flex items-center gap-2 md:hidden">
@@ -243,6 +250,13 @@ export default function Navbar() {
                                 onClick={closeMobile}
                             >
                                 영상
+                            </Link>
+                            <Link
+                                href="/profile"
+                                className={drawerLinkClass("/profile")}
+                                onClick={closeMobile}
+                            >
+                                프로필
                             </Link>
 
                             {state.status === "AUTHENTICATED" && (
