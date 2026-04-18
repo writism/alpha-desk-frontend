@@ -122,7 +122,7 @@ export function NewsListPage() {
     }, [items, titleQuery, sortOrder])
 
     return (
-        <main className="max-w-3xl mx-auto p-6 pt-8 md:p-8">
+        <main className="max-w-5xl mx-auto px-6 md:px-8 pt-6 pb-24 md:pb-8">
             {/* Header */}
             <div className="mb-4 border-b border-outline pb-4">
                 <div className="flex items-center justify-between gap-4">

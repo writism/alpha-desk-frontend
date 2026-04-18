@@ -13,9 +13,11 @@ export async function fetchReportSummaries(): Promise<StockSummary[]> {
     return res.json()
 }
 
-export async function runPipeline(symbols?: string[]): Promise<PipelineResult> {
-    const body = symbols && symbols.length > 0 ? { symbols } : undefined
-    const res = await httpClient.post("/pipeline/run", body)
+export async function runPipeline(symbols?: string[], articleMode?: string): Promise<PipelineResult> {
+    const body: Record<string, unknown> = {}
+    if (symbols && symbols.length > 0) body.symbols = symbols
+    if (articleMode) body.article_mode = articleMode
+    const res = await httpClient.post("/pipeline/run", Object.keys(body).length ? body : undefined)
     return res.json()
 }
 
@@ -45,12 +47,16 @@ export type RunPipelineStreamResult =
 export async function runPipelineStream(
     symbols: string[] | undefined,
     onEvent: (event: PipelineProgressEvent) => void,
+    articleMode?: string,
 ): Promise<RunPipelineStreamResult> {
+    const body: Record<string, unknown> = {}
+    if (symbols && symbols.length > 0) body.symbols = symbols
+    if (articleMode) body.article_mode = articleMode
     const res = await fetch(`/api/pipeline/run-stream`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(symbols && symbols.length > 0 ? { symbols } : {}),
+        body: JSON.stringify(body),
     })
 
     if (res.status === 404) return { used: false }

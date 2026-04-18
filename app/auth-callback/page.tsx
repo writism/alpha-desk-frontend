@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
                 })
                 router.replace(`/terms?${params}`)
             } else if (result.result === "authenticated") {
-                router.replace("/")
+                router.replace("/my")
             } else {
                 router.replace("/login")
             }

@@ -29,6 +29,7 @@ export default function DashboardPage() {
         analysisLogs,
         isLoading: isSummaryLoading,
         error: summaryError,
+        running,
         pipelineResult,
         progressEvents,
         elapsedSeconds,
@@ -36,7 +37,6 @@ export default function DashboardPage() {
         reload,
     } = useDashboard()
     const { items, isLoading: isWatchlistLoading, error: watchlistError } = useWatchlist()
-    const [running, setRunning] = useState(false)
     const [selectedSymbols, setSelectedSymbols] = useState<string[]>([])
     const [hasInitializedSelection, setHasInitializedSelection] = useState(false)
 
@@ -74,12 +74,7 @@ export default function DashboardPage() {
 
     const handleRunPipeline = async () => {
         if (selectedSymbols.length === 0) return
-        setRunning(true)
-        try {
-            await executePipeline(selectedSymbols)
-        } finally {
-            setRunning(false)
-        }
+        await executePipeline(selectedSymbols)
     }
 
     const allSkipped = pipelineResult ? pipelineResult.processed.every((p) => p.skipped) : false
@@ -104,34 +99,35 @@ export default function DashboardPage() {
     const { bySymbol: heatmapBySymbol, data: heatmapData } = useDailyReturnsHeatmap(heatmapSymbols, 6)
 
     return (
+        <>
+        {/* Sticky 페이지 헤더 */}
+        <div className="sticky top-0 z-40 bg-surface border-b border-outline">
+            <div className="max-w-5xl mx-auto px-6 md:px-8 flex items-stretch justify-between">
+                <div className="flex flex-col px-5 py-3 font-mono text-xs uppercase">
+                    <span className="font-bold tracking-widest text-on-surface">DASHBOARD</span>
+                    <span className="text-[9px] text-on-surface-variant/60 normal-case mt-0.5">관심종목 AI 분석 요약</span>
+                </div>
+                <div className="flex items-center pr-2">
+                    <button
+                        type="button"
+                        onClick={handleRunPipeline}
+                        disabled={running || isSummaryLoading || !canRun}
+                        className="flex items-center gap-1.5 bg-primary px-3 py-1.5 font-mono text-[10px] text-white uppercase hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        {running && (
+                            <span className="inline-block w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        )}
+                        {running
+                            ? `ANALYZING... (${selectedSymbols.length})`
+                            : `RUN_ANALYSIS (${selectedSymbols.length})`}
+                    </button>
+                </div>
+            </div>
+        </div>
         <main
-            className="max-w-6xl mx-auto p-6 pt-8 md:p-8"
+            className="max-w-5xl mx-auto px-6 md:px-8 pt-4 pb-24 md:pb-8"
             aria-busy={running}
         >
-            <header className="mb-6 flex items-center justify-between border-b border-outline pb-4">
-                <div>
-                    <div className="font-headline font-bold text-on-surface text-xl uppercase tracking-tighter">
-                        DASHBOARD
-                    </div>
-                    <div className="font-mono text-sm text-on-surface-variant mt-0.5">
-                        관심종목 AI 분석 요약
-                    </div>
-                </div>
-                <button
-                    type="button"
-                    onClick={handleRunPipeline}
-                    disabled={running || isSummaryLoading || !canRun}
-                    className="flex items-center gap-2 bg-primary px-4 py-2 font-mono text-[11px] text-white uppercase hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                    {running && (
-                        <span className="inline-block w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    )}
-                    {running
-                        ? `ANALYZING... (${selectedSymbols.length})`
-                        : `RUN_ANALYSIS (${selectedSymbols.length})`}
-                </button>
-            </header>
-
             <DashboardPipelineResult
                 running={running}
                 pipelineResult={pipelineResult}
@@ -185,5 +181,6 @@ export default function DashboardPage() {
                 heatmapWeeks={heatmapData?.weeks ?? 6}
             />
         </main>
+        </>
     )
 }

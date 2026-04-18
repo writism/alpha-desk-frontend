@@ -1,5 +1,5 @@
-import { InvestPage } from "@/features/invest/ui/components/InvestPage"
+import { redirect } from 'next/navigation'
 
 export default function InvestRoute() {
-    return <InvestPage />
+    redirect('/ai-insight')
 }

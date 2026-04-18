@@ -135,6 +135,8 @@ export function DashboardSummarySection({
                                     url={stock.url}
                                     heatmap={hi ? { item: hi, weeks: heatmapWeeks } : undefined}
                                     analyzed_at={stock.analyzed_at}
+                                    article_published_at={stock.article_published_at}
+                                    source_name={stock.source_name}
                                     isLoggedIn={isLoggedIn}
                                     showBoardPublishButton={isLoggedIn}
                                     onCardClick={onCardClick ? () => onCardClick(stock.symbol, stock.name) : undefined}

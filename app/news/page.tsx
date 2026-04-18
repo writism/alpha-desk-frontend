@@ -1,5 +1,5 @@
-import { NewsListPage } from "@/features/news/ui/components/NewsListPage"
+import { redirect } from 'next/navigation'
 
 export default function NewsPage() {
-    return <NewsListPage />
+    redirect('/market-feed')
 }

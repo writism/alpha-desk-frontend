@@ -79,7 +79,7 @@ export function InvestPage() {
     const isEmpty = !query.trim()
 
     return (
-        <main className="max-w-5xl mx-auto p-6 pt-8 md:p-8">
+        <main className="max-w-5xl mx-auto px-6 md:px-8 pt-6 pb-24 md:pb-8">
             <header className="mb-6 border-b border-outline pb-4">
                 <div className="font-headline font-bold text-on-surface text-xl uppercase tracking-tighter">
                     INVEST
@@ -113,7 +113,7 @@ export function InvestPage() {
                                 <button
                                     type="button"
                                     onClick={reset}
-                                    className="font-mono text-xs text-on-surface-variant border border-outline-variant px-2 py-1 uppercase hover:bg-surface-container-high transition-none"
+                                    className="font-mono text-[10px] text-on-surface-variant border border-outline-variant px-3 py-1.5 uppercase hover:bg-surface-container-high transition-none"
                                 >
                                     초기화
                                 </button>
@@ -122,7 +122,7 @@ export function InvestPage() {
                                 type="button"
                                 onClick={submit}
                                 disabled={isEmpty || isLoading}
-                                className="font-mono text-xs font-bold px-4 py-1 uppercase border transition-none
+                                className="font-mono text-[10px] font-bold px-4 py-1.5 uppercase border transition-none
                                     bg-primary border-primary text-white
                                     disabled:opacity-40 disabled:cursor-not-allowed
                                     enabled:hover:opacity-90"

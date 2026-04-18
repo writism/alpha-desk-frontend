@@ -10,20 +10,16 @@ import NotificationBell from "@/features/notification/ui/components/Notification
 const NAV_ITEMS = [
     { href: "/", label: "HOME", exact: true },
     { href: "/dashboard", label: "DASHBOARD" },
-    { href: "/watchlist", label: "WATCHLIST" },
+    { href: "/market-feed", label: "MARKET_FEED" },
+    { href: "/ai-insight", label: "AI_INSIGHT" },
     { href: "/board", label: "BOARD" },
-    { href: "/news", label: "NEWS" },
-    { href: "/stock-recommendation", label: "PICKS" },
-    { href: "/youtube", label: "VIDEOS" },
 ]
 
 export default function TopBar() {
     const { state, logout, loadUser } = useAuth()
     const router = useRouter()
     const pathname = usePathname()
-    const { theme, toggle } = useTheme()
-
-    const isLoggedIn = state.status === "AUTHENTICATED"
+const isLoggedIn = state.status === "AUTHENTICATED"
 
     useEffect(() => {
         loadUser()
@@ -51,8 +47,8 @@ export default function TopBar() {
                             href={href}
                             className={
                                 (exact ? pathname === href : pathname.startsWith(href))
-                                    ? "text-white border-b-2 border-inverse-primary pb-1"
-                                    : "text-inverse-on-surface opacity-70 hover:text-white transition-none px-1"
+                                    ? "text-inverse-primary border-b-2 border-inverse-primary pb-1"
+                                    : "text-inverse-on-surface opacity-50 hover:opacity-100 hover:text-inverse-on-surface transition-none px-1"
                             }
                         >
                             {label}
@@ -62,22 +58,23 @@ export default function TopBar() {
             </div>
 
             <div className="flex items-center gap-2">
-                <button
-                    type="button"
-                    onClick={toggle}
-                    className="border border-outline-variant font-mono text-[10px] text-inverse-on-surface px-1.5 py-0.5 hover:text-white hover:border-inverse-primary transition-none uppercase cursor-pointer"
-                    title={theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환"}
-                    suppressHydrationWarning
-                >
-                    <span className="material-symbols-outlined text-[14px]" suppressHydrationWarning>
-                        {theme === "dark" ? "light_mode" : "dark_mode"}
-                    </span>
-                </button>
-
-                {isLoggedIn && state.status === "AUTHENTICATED" && (
-                    <span className="font-mono text-[10px] text-inverse-on-surface opacity-70 uppercase tracking-widest max-w-[80px] sm:max-w-none truncate">
-                        {state.user.nickname}
-                    </span>
+{isLoggedIn && state.status === "AUTHENTICATED" && (
+                    <Link
+                        href="/my"
+                        className={`flex items-center gap-1.5 border px-2 py-0.5 font-mono text-[10px] tracking-widest max-w-[160px] sm:max-w-none transition-none ${
+                            pathname === "/my" || pathname.startsWith("/my/")
+                                ? "border-inverse-primary bg-inverse-primary/15 text-inverse-primary font-bold"
+                                : "border-outline-variant text-inverse-on-surface opacity-50 hover:opacity-100 hover:border-inverse-primary hover:text-inverse-on-surface"
+                        }`}
+                    >
+                        <span className="material-symbols-outlined text-[13px] shrink-0">person</span>
+                        <span className="flex flex-col min-w-0">
+                            <span className="uppercase truncate leading-tight">{state.user.nickname}</span>
+                            {state.user.email && (
+                                <span className="text-[9px] opacity-70 truncate normal-case leading-tight">{state.user.email}</span>
+                            )}
+                        </span>
+                    </Link>
                 )}
 
                 {isLoggedIn && (

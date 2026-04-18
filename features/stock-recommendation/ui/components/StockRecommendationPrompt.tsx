@@ -31,7 +31,7 @@ export function StockRecommendationPrompt() {
     const isEmpty = !question.trim()
 
     return (
-        <main className="max-w-5xl mx-auto p-6 pt-8 md:p-8">
+        <main className="max-w-5xl mx-auto px-6 md:px-8 pt-6 pb-24 md:pb-8">
             <header className="mb-6 border-b border-outline pb-4">
                 <div className="font-headline font-bold text-on-surface text-xl uppercase tracking-tighter">
                     STOCK_PICKS

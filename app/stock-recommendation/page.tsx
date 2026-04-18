@@ -1,5 +1,5 @@
-import { StockRecommendationPrompt } from "@/features/stock-recommendation/ui/components/StockRecommendationPrompt"
+import { redirect } from 'next/navigation'
 
 export default function StockRecommendationPage() {
-    return <StockRecommendationPrompt />
+    redirect('/ai-insight')
 }

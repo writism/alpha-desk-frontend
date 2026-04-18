@@ -1,5 +1,5 @@
-import { YoutubeVideoFeed } from "@/features/youtube/ui/components/YoutubeVideoFeed"
+import { redirect } from 'next/navigation'
 
 export default function YoutubePage() {
-    return <YoutubeVideoFeed />
+    redirect('/market-feed')
 }

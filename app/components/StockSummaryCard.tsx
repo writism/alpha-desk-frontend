@@ -20,6 +20,8 @@ interface StockSummaryCardProps {
   url?: string
   heatmap?: { item: HeatmapItem; weeks: number; asOf?: string | null }
   analyzed_at?: string
+  article_published_at?: string
+  source_name?: string
   isLoggedIn?: boolean
   /** 이미 공유된 카드 ID (게시판 연동 읽기 등) */
   sharedCardId?: number
@@ -31,12 +33,21 @@ interface StockSummaryCardProps {
   /** 대시보드 등에서 게시판 등록 버튼 */
   showBoardPublishButton?: boolean
   onCardClick?: () => void
+  personalized?: boolean
 }
 
 const SOURCE_LABEL: Record<string, string> = {
   NEWS: '뉴스',
   DISCLOSURE: '공시',
   REPORT: '재무',
+}
+
+const SOURCE_NAME_LABEL: Record<string, string> = {
+  NAVER_NEWS: '네이버뉴스',
+  GOOGLE_NEWS: '구글뉴스',
+  FINNHUB: 'Finnhub',
+  DART: 'DART',
+  DART_FINANCIAL: 'DART 재무',
 }
 
 const SENTIMENT_STYLE: Record<string, string> = {
@@ -63,6 +74,8 @@ export default function StockSummaryCard({
   url,
   heatmap,
   analyzed_at,
+  article_published_at,
+  source_name,
   isLoggedIn = false,
   sharedCardId,
   sharedCardLikeCount = 0,
@@ -71,6 +84,7 @@ export default function StockSummaryCard({
   snsShareEnabled = true,
   showBoardPublishButton = false,
   onCardClick,
+  personalized = false,
 }: StockSummaryCardProps) {
   const sentimentStyle = sentiment ? SENTIMENT_STYLE[sentiment] : SENTIMENT_STYLE.NEUTRAL
   const sentimentLabel = sentiment ? SENTIMENT_LABEL[sentiment] : '중립'
@@ -101,15 +115,38 @@ export default function StockSummaryCard({
             </span>
           )}
         </div>
-        {sentiment && (
-          <span className={`border font-mono text-xs px-2 py-0.5 font-bold ${sentimentStyle}`}>
-            {sentimentLabel} {scoreStr}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {personalized && (
+            <span className="font-mono text-[10px] font-bold text-primary border border-primary px-1.5 py-0.5 uppercase tracking-widest">
+              맞춤_분석
+            </span>
+          )}
+          {sentiment && (
+            <span className={`border font-mono text-xs px-2 py-0.5 font-bold ${sentimentStyle}`}>
+              {sentimentLabel} {scoreStr}
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Summary */}
       <p className="font-mono text-sm text-on-surface leading-relaxed">{summary}</p>
+
+      {/* Source + date — news card 형식 */}
+      {article_published_at && (
+        <div className="flex gap-3 font-mono text-xs text-outline">
+          <span>
+            {source_name
+              ? (SOURCE_NAME_LABEL[source_name] ?? source_name)
+              : (source_type ? SOURCE_LABEL[source_type] : '뉴스')}
+          </span>
+          <span>
+            {new Date(article_published_at).toLocaleDateString("ko-KR", {
+              year: "numeric", month: "2-digit", day: "2-digit",
+            })}
+          </span>
+        </div>
+      )}
 
       {/* Heatmap */}
       {heatmap && (

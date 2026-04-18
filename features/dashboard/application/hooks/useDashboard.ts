@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback } from "react"
+import { useAtom } from "jotai"
+import useSWR, { mutate as globalMutate } from "swr"
 import { ApiError } from "@/infrastructure/http/apiError"
 import type { PipelineProgressEvent } from "../../domain/model/pipelineProgressEvent"
 import {
@@ -11,6 +13,25 @@ import {
     runPipelineStream,
 } from "../../infrastructure/api/dashboardApi"
 import type { AnalysisLog, StockSummary, PipelineResult } from "../../domain/model/stockSummary"
+import {
+    pipelineRunningAtom,
+    pipelineProgressEventsAtom,
+    pipelineResultAtom,
+    pipelineElapsedSecondsAtom,
+    pipelineErrorAtom,
+    articleModeAtom,
+} from "../atoms/pipelineAtom"
+
+const DASHBOARD_KEY = "/dashboard/data"
+
+async function fetchDashboardData() {
+    const [summaryData, reportData, logData] = await Promise.all([
+        fetchDashboardSummaries(),
+        fetchReportSummaries(),
+        fetchAnalysisLogs(),
+    ])
+    return { summaries: summaryData, reportSummaries: reportData, analysisLogs: logData }
+}
 
 function formatLoadError(err: unknown): string {
     if (err instanceof ApiError) {
@@ -29,43 +50,25 @@ function formatPipelineError(err: unknown): string {
 }
 
 export const useDashboard = () => {
-    const [summaries, setSummaries] = useState<StockSummary[]>([])
-    const [reportSummaries, setReportSummaries] = useState<StockSummary[]>([])
-    const [analysisLogs, setAnalysisLogs] = useState<AnalysisLog[]>([])
-    const [isLoading, setIsLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
-    const [pipelineResult, setPipelineResult] = useState<PipelineResult | null>(null)
-    const [progressEvents, setProgressEvents] = useState<PipelineProgressEvent[]>([])
-    const [elapsedSeconds, setElapsedSeconds] = useState<number | null>(null)
+    const { data, error: swrError, isLoading, mutate } = useSWR(
+        DASHBOARD_KEY,
+        fetchDashboardData,
+        { dedupingInterval: 10 * 60 * 1000 },
+    )
 
-    const load = useCallback(async () => {
-        setIsLoading(true)
-        setError(null)
-        try {
-            const [summaryData, reportData, logData] = await Promise.all([
-                fetchDashboardSummaries(),
-                fetchReportSummaries(),
-                fetchAnalysisLogs(),
-            ])
-            setSummaries(summaryData)
-            setReportSummaries(reportData)
-            setAnalysisLogs(logData)
-        } catch (err) {
-            setError(formatLoadError(err))
-        } finally {
-            setIsLoading(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        load()
-    }, [load])
+    const [running, setRunning] = useAtom(pipelineRunningAtom)
+    const [pipelineError, setPipelineError] = useAtom(pipelineErrorAtom)
+    const [pipelineResult, setPipelineResult] = useAtom(pipelineResultAtom)
+    const [progressEvents, setProgressEvents] = useAtom(pipelineProgressEventsAtom)
+    const [elapsedSeconds, setElapsedSeconds] = useAtom(pipelineElapsedSecondsAtom)
+    const [articleMode, setArticleMode] = useAtom(articleModeAtom)
 
     const executePipeline = useCallback(async (symbols?: string[]) => {
-        setError(null)
+        setPipelineError(null)
         setPipelineResult(null)
         setProgressEvents([])
         setElapsedSeconds(null)
+        setRunning(true)
 
         const startedAt = Date.now()
 
@@ -74,36 +77,42 @@ export const useDashboard = () => {
         }
 
         try {
-            const streamResult = await runPipelineStream(symbols, onEvent)
+            const streamResult = await runPipelineStream(symbols, onEvent, articleMode)
 
             if (!streamResult.used) {
-                // SSE 미지원 시 폴백
-                const result = await runPipeline(symbols)
+                const result = await runPipeline(symbols, articleMode)
                 setPipelineResult(result)
             } else if (streamResult.streamError) {
-                setError(streamResult.streamError)
+                setPipelineError(streamResult.streamError)
             }
 
             setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000))
-            await load()
+            await globalMutate(DASHBOARD_KEY)
             setProgressEvents([])
         } catch (err) {
             setElapsedSeconds(Math.round((Date.now() - startedAt) / 1000))
-            setError(formatPipelineError(err))
+            setPipelineError(formatPipelineError(err))
             setProgressEvents([])
+        } finally {
+            setRunning(false)
         }
-    }, [load])
+    }, [setPipelineError, setPipelineResult, setProgressEvents, setElapsedSeconds, setRunning, articleMode])
+
+    const error = swrError ? formatLoadError(swrError) : pipelineError
 
     return {
-        summaries,
-        reportSummaries,
-        analysisLogs,
+        summaries: data?.summaries ?? [],
+        reportSummaries: data?.reportSummaries ?? [],
+        analysisLogs: data?.analysisLogs ?? [],
         isLoading,
         error,
+        running,
         pipelineResult,
         progressEvents,
         elapsedSeconds,
+        articleMode,
+        setArticleMode,
         executePipeline,
-        reload: load,
+        reload: mutate,
     }
 }

@@ -4,6 +4,7 @@ import "./globals.css"
 import JotaiProvider from "@/components/JotaiProvider"
 import AuthProvider from "@/components/AuthProvider"
 import ClientShell from "@/components/ClientShell"
+import SWRProvider from "@/components/SWRProvider"
 import { KakaoSDKLoader } from "@/features/share/ui/components/KakaoSDKLoader"
 
 const spaceGrotesk = Space_Grotesk({
@@ -47,14 +48,16 @@ export default function RootLayout({
                 />
             </head>
             <body className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} ${inter.variable} h-full overflow-hidden`}>
-                <JotaiProvider>
-                    <AuthProvider>
-                        <KakaoSDKLoader />
-                        <ClientShell>
-                            {children}
-                        </ClientShell>
-                    </AuthProvider>
-                </JotaiProvider>
+                <SWRProvider>
+                    <JotaiProvider>
+                        <AuthProvider>
+                            <KakaoSDKLoader />
+                            <ClientShell>
+                                {children}
+                            </ClientShell>
+                        </AuthProvider>
+                    </JotaiProvider>
+                </SWRProvider>
             </body>
         </html>
     )
