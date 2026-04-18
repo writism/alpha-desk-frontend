@@ -1,0 +1,84 @@
+name: Deploy multi-agent-ui via Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create .env file
+        run: echo "${{ secrets.FRONTEND_ENV }}" > .env
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.REPO_USER }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=registry,ref=ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:cache
+          cache-to: type=registry,ref=ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:cache,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: [self-hosted, multi-agent-ui]
+
+    steps:
+      - name: GHCR Login
+        run: echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ secrets.REPO_USER }} --password-stdin
+
+      - name: Pull latest image
+        run: docker pull ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
+
+      - name: Ensure network exists
+        run: |
+          docker network inspect alphadesk-network >/dev/null 2>&1 || \
+          docker network create alphadesk-network
+
+      - name: Stop old container
+        run: |
+          docker stop alphadesk-web || true
+          docker rm alphadesk-web || true
+          docker image prune -f
+
+      - name: Run container
+        run: |
+          docker run -d \
+            --name alphadesk-web \
+            -p 3000:3000 \
+            -e BACKEND_URL=http://alphadesk-api:33333 \
+            --network alphadesk-network \
+            --restart unless-stopped \
+            ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
+
+      - name: Health check
+        run: |
+          sleep 5
+          if curl -sSf http://localhost:3000/ > /dev/null; then
+            echo "alphadesk-web is UP"
+          else
+            echo "Health check failed"
+            docker logs alphadesk-web --tail 200
+            exit 1
+          fi
