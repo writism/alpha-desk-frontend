@@ -108,9 +108,10 @@ export default function Navbar() {
                         (isLoggedIn ? (
                             <>
                                 {state.status === "AUTHENTICATED" && (
-                                    <div
-                                        className="mr-3 hidden max-w-[14rem] flex-col items-end text-right break-keep md:flex"
-                                        aria-label="로그인한 사용자"
+                                    <Link
+                                        href="/profile"
+                                        className="mr-3 hidden max-w-[14rem] flex-col items-end text-right break-keep md:flex hover:opacity-80 transition-opacity"
+                                        aria-label="프로필 페이지로 이동"
                                     >
                                         <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">
                                             닉네임
@@ -126,7 +127,7 @@ export default function Navbar() {
                                                 {state.user.email}
                                             </span>
                                         ) : null}
-                                    </div>
+                                    </Link>
                                 )}
                                 <button
                                     type="button"
@@ -243,6 +244,13 @@ export default function Navbar() {
                                 onClick={closeMobile}
                             >
                                 영상
+                            </Link>
+                            <Link
+                                href="/profile"
+                                className={drawerLinkClass("/profile")}
+                                onClick={closeMobile}
+                            >
+                                프로필
                             </Link>
 
                             {state.status === "AUTHENTICATED" && (
