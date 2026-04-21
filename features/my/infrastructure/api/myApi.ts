@@ -22,3 +22,21 @@ export function getBriefingSettingsLocal(): BriefingTimeSettings {
 export function saveBriefingSettingsLocal(settings: BriefingTimeSettings): void {
     localStorage.setItem(BRIEFING_SETTINGS_KEY, JSON.stringify(settings))
 }
+
+export interface InvestmentProfile {
+    investment_style: string
+    risk_tolerance: string
+    preferred_sectors: string[]
+    analysis_preference: string
+    keywords_of_interest: string[]
+}
+
+export async function getInvestmentProfile(userId: number): Promise<InvestmentProfile> {
+    const res = await httpClient.get(`/users/${userId}/investment-profile`)
+    return res.json()
+}
+
+export async function saveInvestmentProfile(userId: number, profile: InvestmentProfile): Promise<InvestmentProfile> {
+    const res = await httpClient.patch(`/users/${userId}/investment-profile`, profile)
+    return res.json()
+}
