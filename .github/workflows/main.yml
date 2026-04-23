@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-deploy:
-    if: secrets.REPO_USER != '' && secrets.GHCR_TOKEN != ''
+    if: github.repository_owner == 'writism'
     runs-on: [self-hosted, multi-agent-ui]
 
     steps:
