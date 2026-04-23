@@ -59,7 +59,7 @@ export function useNewsList() {
     const router = useRouter()
 
     const fetchPage = useCallback(async (page: number, market: MarketFilter) => {
-        setState((s) => ({ ...s, isLoading: true, error: null, page }))
+        setState((s) => ({ ...s, isLoading: true, error: null, page, items: [], totalCount: 0 }))
 
         try {
             const { kr, us } = await buildMarketKeywords()
@@ -69,27 +69,30 @@ export function useNewsList() {
             if (market !== "KR" && us) calls.push(searchNews(us, "US", page, PAGE_SIZE))
             if (calls.length === 0) calls.push(searchNews("stock", null, page, PAGE_SIZE))
 
-            const results = await Promise.all(calls)
-
             const seenLinks = new Set<string>()
-            const merged = results
-                .flatMap((r) => r.items)
-                .filter((item) => {
-                    if (seenLinks.has(item.link ?? "")) return false
-                    seenLinks.add(item.link ?? "")
-                    return true
-                })
+            let remaining = calls.length
 
-            const totalCount = results.reduce((sum, r) => sum + r.total_count, 0)
-
-            setState({
-                items: merged,
-                totalCount,
-                page,
-                pageSize: PAGE_SIZE,
-                isLoading: false,
-                error: null,
-            })
+            for (const call of calls) {
+                call
+                    .then((result) => {
+                        remaining -= 1
+                        const newItems = result.items.filter((item) => {
+                            if (seenLinks.has(item.link ?? "")) return false
+                            seenLinks.add(item.link ?? "")
+                            return true
+                        })
+                        setState((s) => ({
+                            ...s,
+                            items: [...s.items, ...newItems],
+                            totalCount: s.totalCount + result.total_count,
+                            isLoading: remaining > 0,
+                        }))
+                    })
+                    .catch(() => {
+                        remaining -= 1
+                        setState((s) => ({ ...s, isLoading: remaining > 0 }))
+                    })
+            }
         } catch (err) {
             const message =
                 err instanceof ApiError
