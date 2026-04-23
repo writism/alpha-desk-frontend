@@ -21,10 +21,8 @@ jobs:
         run: |
           set -a && source .env && set +a
           docker build -t alphadesk-web:latest . \
-            --build-arg NEXT_PUBLIC_API_BASE_URL="${NEXT_PUBLIC_API_BASE_URL}" \
-            --build-arg NEXT_PUBLIC_KAKAO_LOGIN_PATH="${NEXT_PUBLIC_KAKAO_LOGIN_PATH}" \
-            --build-arg NEXT_PUBLIC_KAKAO_JS_KEY="${NEXT_PUBLIC_KAKAO_JS_KEY}" \
-            --build-arg NEXT_PUBLIC_SHARE_BASE_URL="${NEXT_PUBLIC_SHARE_BASE_URL}"
+            --build-arg NEXT_PUBLIC_KAKAO_JS_KEY="${NEXT_PUBLIC_KAKAO_JS_KEY:-}" \
+            --build-arg NEXT_PUBLIC_SHARE_BASE_URL="${NEXT_PUBLIC_SHARE_BASE_URL:-}"
 
       - name: Ensure network
         run: docker network inspect alphadesk-network >/dev/null 2>&1 || docker network create alphadesk-network
