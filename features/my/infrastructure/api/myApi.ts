@@ -24,24 +24,6 @@ export function saveBriefingSettingsLocal(settings: BriefingTimeSettings): void 
     localStorage.setItem(BRIEFING_SETTINGS_KEY, JSON.stringify(settings))
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-const ARTICLE_MODE_KEY = 'alpha_article_mode'
-const ARTICLE_MODE_DEFAULT: ArticleMode = 'latest_3'
-
-export function getArticleModeLocal(): ArticleMode {
-    if (typeof window === 'undefined') return ARTICLE_MODE_DEFAULT
-    return (localStorage.getItem(ARTICLE_MODE_KEY) as ArticleMode) ?? ARTICLE_MODE_DEFAULT
-}
-
-export function saveArticleModeLocal(mode: ArticleMode): void {
-    localStorage.setItem(ARTICLE_MODE_KEY, mode)
-}
-
-=======
->>>>>>> f153b25 (refactor: perf·types 리팩토링 + 안정성 백로그 일괄 반영)
-=======
->>>>>>> 60b777e (feat(fe): My 투자 프로필 섹션 + alpha-desk 페이지 + 신규 UI 유틸)
 export interface InvestmentProfile {
     investment_style: string
     risk_tolerance: string
@@ -59,9 +41,6 @@ export async function saveInvestmentProfile(userId: number, profile: InvestmentP
     const res = await httpClient.patch(`/users/${userId}/investment-profile`, profile)
     return res.json()
 }
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
 const ARTICLE_MODE_KEY = 'alpha_article_mode'
 const ARTICLE_MODE_DEFAULT: ArticleMode = 'latest_3'
@@ -74,6 +53,3 @@ export function getArticleModeLocal(): ArticleMode {
 export function saveArticleModeLocal(mode: ArticleMode): void {
     localStorage.setItem(ARTICLE_MODE_KEY, mode)
 }
->>>>>>> f153b25 (refactor: perf·types 리팩토링 + 안정성 백로그 일괄 반영)
-=======
->>>>>>> 60b777e (feat(fe): My 투자 프로필 섹션 + alpha-desk 페이지 + 신규 UI 유틸)

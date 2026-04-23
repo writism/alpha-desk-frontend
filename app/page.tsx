@@ -1,7 +1,10 @@
 "use client"
 
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { useHome } from "@/features/home/application/hooks/useHome"
+import { getCookie } from "@/infrastructure/utils/cookie"
+import WatchlistGuideToast from "@/features/watchlist/ui/components/WatchlistGuideToast"
 import { HomeSentimentGauge } from "@/app/components/HomeSentimentGauge"
 import { HomeAlphaTopPicks } from "@/app/components/HomeAlphaTopPicks"
 import { HomeTodayBriefing } from "@/app/components/HomeTodayBriefing"
@@ -39,6 +42,18 @@ function FeatureHighlights() {
 
 export default function HomePage() {
     const state = useHome()
+    const [showWatchlistGuide, setShowWatchlistGuide] = useState(false)
+
+    useEffect(() => {
+        if (getCookie("watchlist-guide")) {
+            setShowWatchlistGuide(true)
+        }
+    }, [])
+
+    const dismissWatchlistGuide = useCallback(() => {
+        document.cookie = "watchlist-guide=; path=/; max-age=0"
+        setShowWatchlistGuide(false)
+    }, [])
 
     const isPublic = state.status === "PUBLIC_READY"
     const isReady = state.status === "READY"
@@ -46,6 +61,7 @@ export default function HomePage() {
 
     return (
         <>
+            {showWatchlistGuide && <WatchlistGuideToast onDismiss={dismissWatchlistGuide} />}
             {/* Sticky 페이지 헤더 - 탭바와 동일 높이 */}
             <div className="sticky top-0 z-40 bg-surface border-b border-outline">
                 <div className="max-w-5xl mx-auto px-6 md:px-8 flex items-stretch justify-between">

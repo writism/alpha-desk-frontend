@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useDashboard } from "@/features/dashboard/application/hooks/useDashboard"
@@ -13,7 +14,7 @@ import { DashboardPipelineResult } from "./components/DashboardPipelineResult"
 import { DashboardSummarySection } from "./components/DashboardSummarySection"
 import { DashboardWatchlistSection } from "./components/DashboardWatchlistSection"
 
-export default function DashboardPage() {
+function DashboardPage() {
     const { state: authState } = useAuth()
     const isLoggedIn = authState.status === "AUTHENTICATED"
     const recordRecentlyViewed = useRecordRecentlyViewed()
@@ -194,5 +195,13 @@ export default function DashboardPage() {
             />
         </main>
         </>
+    )
+}
+
+export default function Page() {
+    return (
+        <Suspense>
+            <DashboardPage />
+        </Suspense>
     )
 }
