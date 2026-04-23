@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useRouter } from "next/navigation"
 import { ApiError } from "@/infrastructure/http/apiError"
@@ -58,7 +58,10 @@ export function useNewsList() {
     const [marketFilter, setMarketFilter] = useAtom(newsMarketFilterAtom)
     const router = useRouter()
 
+    const fetchIdRef = useRef(0)
+
     const fetchPage = useCallback(async (page: number, market: MarketFilter) => {
+        const fetchId = ++fetchIdRef.current
         setState((s) => ({ ...s, isLoading: true, error: null, page, items: [], totalCount: 0 }))
 
         try {
@@ -75,6 +78,7 @@ export function useNewsList() {
             for (const call of calls) {
                 call
                     .then((result) => {
+                        if (fetchId !== fetchIdRef.current) return
                         remaining -= 1
                         const newItems = result.items.filter((item) => {
                             if (seenLinks.has(item.link ?? "")) return false
@@ -89,11 +93,13 @@ export function useNewsList() {
                         }))
                     })
                     .catch(() => {
+                        if (fetchId !== fetchIdRef.current) return
                         remaining -= 1
                         setState((s) => ({ ...s, isLoading: remaining > 0 }))
                     })
             }
         } catch (err) {
+            if (fetchId !== fetchIdRef.current) return
             const message =
                 err instanceof ApiError
                     ? err.message || "뉴스를 불러오지 못했습니다."
