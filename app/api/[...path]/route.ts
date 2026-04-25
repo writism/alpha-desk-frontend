@@ -45,12 +45,15 @@ async function handler(
   if (backendResponse.status >= 300 && backendResponse.status < 400) {
     const location = backendResponse.headers.get("location");
     if (location) {
-      // SSRF/Open Redirect 방지: 백엔드 도메인 또는 상대 경로만 허용
+      // SSRF/Open Redirect 방지: 백엔드 도메인 또는 프론트엔드 도메인(hostname 기준)만 허용
+      // protocol 비교 제외 — BE의 frontend_auth_callback_url이 http://로 설정돼도 https:// 프론트와 매칭되도록
       const isAllowed = (() => {
         try {
           const parsed = new URL(location, BACKEND_URL);
-          const backendOrigin = new URL(BACKEND_URL).origin;
-          return parsed.origin === backendOrigin || parsed.origin === request.nextUrl.origin;
+          if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+          const backendHost = new URL(BACKEND_URL).hostname;
+          const frontendHost = request.nextUrl.hostname;
+          return parsed.hostname === backendHost || parsed.hostname === frontendHost;
         } catch {
           return location.startsWith("/");
         }
