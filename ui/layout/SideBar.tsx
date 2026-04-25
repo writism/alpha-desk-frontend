@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useIsAdmin } from "@/features/admin/application/hooks/useIsAdmin"
 
 const NAV_GROUPS = [
     {
@@ -35,6 +36,7 @@ const SETTINGS_ITEMS = [
 
 export default function SideBar() {
     const pathname = usePathname()
+    const isAdmin = useIsAdmin()
 
     const isActive = (href: string, exact?: boolean) =>
         exact ? pathname === href : pathname === href || pathname.startsWith(href + "/")
@@ -86,6 +88,9 @@ export default function SideBar() {
                 {SETTINGS_ITEMS.map(({ href, label, icon }) => (
                     <NavLink key={href} href={href} label={label} icon={icon} />
                 ))}
+                {isAdmin && (
+                    <NavLink href="/admin" label="ADMIN" icon="admin_panel_settings" />
+                )}
             </div>
 
             <div className="p-3 pb-8 border-t border-outline font-mono text-[9px] text-on-surface-variant leading-relaxed">
