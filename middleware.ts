@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const nickname = request.cookies.get("nickname")
     if (!nickname) {
         return NextResponse.redirect(new URL("/login", request.url))
@@ -9,5 +9,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/dashboard", "/watchlist"],
+    matcher: [
+        "/dashboard/:path*",
+        "/watchlist/:path*",
+        "/my/:path*",
+        "/board/:path*",
+        "/ai-insight/:path*",
+        "/admin/:path*",
+    ],
 }
