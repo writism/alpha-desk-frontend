@@ -14,6 +14,7 @@ import type { StockItem } from '@/features/stock/domain/model/stockItem'
 import { useClientPagination } from '@/features/shared/application/hooks/useClientPagination'
 import { useWatchlist } from '@/features/watchlist/application/hooks/useWatchlist'
 import { useAccountSettings } from '@/features/account/application/hooks/useAccountSettings'
+import { recordEvent } from '@/features/analytics/infrastructure/api/activityApi'
 
 const MARKET_BADGE: Record<string, string> = {
     KOSPI:  'border-primary text-primary',
@@ -72,6 +73,7 @@ export default function WatchlistPage() {
 
     const handleRegister = async (item: StockItem) => {
         setRegistering(item.symbol)
+        recordEvent("core_start")
         const ok = await add(item.symbol, item.name, item.market)
         setRegistering(null)
         if (ok) clear()
