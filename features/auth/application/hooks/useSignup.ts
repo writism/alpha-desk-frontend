@@ -11,8 +11,8 @@ export const useSignup = () => {
         setIsLoading(true)
         setError(null)
         try {
-            await signUpUser({ nickname, email })
-            window.location.href = "/"
+            const redirectUrl = await signUpUser({ nickname, email })
+            window.location.href = redirectUrl || "/"
         } catch (err) {
             const status = err instanceof ApiError ? err.status : undefined
             if (status === 401) {

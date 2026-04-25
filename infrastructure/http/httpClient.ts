@@ -1,14 +1,24 @@
 import { env } from "@/infrastructure/config/env"
 import { readApiError } from "./apiError"
 
+const TIMEOUT_MS = 15_000
+
 async function ensureOk(res: Response): Promise<Response> {
     if (!res.ok) throw await readApiError(res)
     return res
 }
 
+function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+    return fetch(url, { ...init, signal: controller.signal }).finally(() =>
+        clearTimeout(timer),
+    )
+}
+
 export const httpClient = {
     get: async (path: string) => {
-        const res = await fetch(`${env.apiBaseUrl}${path}`, {
+        const res = await fetchWithTimeout(`${env.apiBaseUrl}${path}`, {
             method: "GET",
             credentials: "include",
         })
@@ -16,7 +26,7 @@ export const httpClient = {
     },
 
     post: async (path: string, body?: unknown) => {
-        const res = await fetch(`${env.apiBaseUrl}${path}`, {
+        const res = await fetchWithTimeout(`${env.apiBaseUrl}${path}`, {
             method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -26,7 +36,7 @@ export const httpClient = {
     },
 
     put: async (path: string, body?: unknown) => {
-        const res = await fetch(`${env.apiBaseUrl}${path}`, {
+        const res = await fetchWithTimeout(`${env.apiBaseUrl}${path}`, {
             method: "PUT",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -36,7 +46,7 @@ export const httpClient = {
     },
 
     patch: async (path: string, body?: unknown) => {
-        const res = await fetch(`${env.apiBaseUrl}${path}`, {
+        const res = await fetchWithTimeout(`${env.apiBaseUrl}${path}`, {
             method: "PATCH",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
@@ -46,7 +56,7 @@ export const httpClient = {
     },
 
     delete: async (path: string) => {
-        const res = await fetch(`${env.apiBaseUrl}${path}`, {
+        const res = await fetchWithTimeout(`${env.apiBaseUrl}${path}`, {
             method: "DELETE",
             credentials: "include",
         })
