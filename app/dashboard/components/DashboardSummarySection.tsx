@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { recordEvent } from "@/features/analytics/infrastructure/api/activityApi"
 import type { PipelineProgressEvent } from "@/features/dashboard/domain/model/pipelineProgressEvent"
 import type { StockSummary } from "@/features/dashboard/domain/model/stockSummary"
 import { DailyReturnsHeatmapLegend } from "@/app/components/DailyReturnsHeatmapLegend"
@@ -37,6 +38,14 @@ export function DashboardSummarySection({
 }: Props) {
     const [activeTab, setActiveTab] = useState<Tab>("news")
     const activeSummaries = activeTab === "news" ? summaries : reportSummaries
+
+    const prevRunning = useRef(false)
+    useEffect(() => {
+        if (prevRunning.current === true && running === false && summaries.length > 0) {
+            recordEvent("core_complete")
+        }
+        prevRunning.current = running
+    }, [running, summaries])
     const showInitialSkeleton = isSummaryLoading && !running && summaries.length === 0
 
     const hasAnyHeatmap = activeSummaries.some(
