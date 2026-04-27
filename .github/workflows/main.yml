@@ -35,6 +35,7 @@ jobs:
             --name alphadesk-web \
             -p 3000:3000 \
             -e BACKEND_URL=http://alphadesk-api:33333 \
+            -e INTERNAL_API_URL=http://alphadesk-api:33333 \
             --network alphadesk-network \
             --restart unless-stopped \
             alphadesk-web:latest
