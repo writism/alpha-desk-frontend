@@ -18,7 +18,7 @@ function getLogColor(line: string): string {
     return "text-on-surface-variant"
 }
 
-function AgentLogPanel({ logs }: { logs: string[] }) {
+function AgentLogPanel({ logs, isLoading }: { logs: string[], isLoading: boolean }) {
     const scrollRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -31,7 +31,7 @@ function AgentLogPanel({ logs }: { logs: string[] }) {
         <div className="border border-outline bg-surface-container">
             {/* 헤더 */}
             <div className="flex items-center gap-2 px-4 py-2 border-b border-outline-variant bg-surface-container-high">
-                <span className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+                <span className={`w-3 h-3 border-2 border-primary border-t-transparent rounded-full shrink-0 ${isLoading ? "animate-spin" : ""}`} />
                 <span className="font-mono text-xs font-bold text-primary uppercase tracking-widest">
                     AGENT LOG
                 </span>
@@ -151,10 +151,10 @@ export function InvestPage() {
                 </div>
             )}
 
-            {/* 에이전트 로그 (로딩 중 또는 완료 후에도 표시) */}
-            {(isLoading || (!result && logs.length > 0)) && (
+            {/* 에이전트 로그 (로딩 중 + 결과 표시 후에도 유지) */}
+            {logs.length > 0 && (
                 <div className="mb-4">
-                    <AgentLogPanel logs={logs} />
+                    <AgentLogPanel logs={logs} isLoading={isLoading} />
                 </div>
             )}
 
