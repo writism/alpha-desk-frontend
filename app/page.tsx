@@ -47,7 +47,7 @@ export default function HomePage() {
     return (
         <>
             {/* Sticky 페이지 헤더 - 탭바와 동일 높이 */}
-            <div className="sticky top-10 z-40 bg-surface border-b border-outline">
+            <div className="sticky top-10 md:top-0 z-40 bg-surface border-b border-outline">
                 <div className="max-w-5xl mx-auto px-6 md:px-8 flex items-stretch justify-between">
                     <div className="flex flex-col px-5 py-3 font-mono text-xs uppercase">
                         <span className="font-bold tracking-widest text-on-surface">HOME</span>

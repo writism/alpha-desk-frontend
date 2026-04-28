@@ -33,7 +33,7 @@ export default function MarketFeedPage() {
     return (
         <div>
             {/* 탭 헤더 */}
-            <div className="sticky top-10 z-40 bg-surface border-b border-outline">
+            <div className="sticky top-10 md:top-0 z-40 bg-surface border-b border-outline">
                 <div className="max-w-5xl mx-auto px-6 md:px-8 flex">
                     {TABS.map((tab) => (
                         <button
