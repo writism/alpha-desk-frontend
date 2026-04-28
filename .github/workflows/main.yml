@@ -14,7 +14,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create .env file
-        run: echo "${{ secrets.FRONTEND_ENV }}" > .env
+        run: |
+          echo "${{ secrets.FRONTEND_ENV }}" > .env
+          KAKAO_KEY=$(grep -E '^NEXT_PUBLIC_KAKAO_JS_KEY=' .env | cut -d'=' -f2-)
+          echo "NEXT_PUBLIC_KAKAO_JS_KEY=${KAKAO_KEY}" >> $GITHUB_ENV
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -37,6 +40,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:latest
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            NEXT_PUBLIC_KAKAO_JS_KEY=${{ env.NEXT_PUBLIC_KAKAO_JS_KEY }}
           cache-from: type=registry,ref=ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:cache
           cache-to: type=registry,ref=ghcr.io/${{ secrets.REPO_USER }}/multi-agent-ui:cache,mode=max
 
